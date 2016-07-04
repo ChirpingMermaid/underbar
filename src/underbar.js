@@ -304,6 +304,40 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var memo = {}; //to store {argument: result_value} pairs
+    
+    return function(){
+      var containsArray = false;
+      var argsArray = [];
+      var args = Array.prototype.slice.call(arguments); 
+      //convert arguments object into a real array to avoid complications  
+
+      //check for and identify array arguments in argsArray   
+      _.each(args, function(arg){
+        if (Array.isArray(arg)){
+          argsArray.push(arg + "Array");
+          containsArray = true;
+        } else {
+          argsArray.push(arg);
+        }
+      });
+
+      if (containsArray){
+        if (argsArray in memo){
+          return memo[argsArray]; 
+        } else { 
+          memo[argsArray] = func.apply(this, args);
+          return memo[argsArray];
+        }
+      } else if (args in memo){ //check if value has been previously computed
+        return memo[args]; 
+      } else { 
+      //otherwise compute value and store in memo
+      // with args as the property, and func result as the property value
+        memo[args] = func.apply(this, args); 
+        return memo[args];
+      }
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
